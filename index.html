@@ -1,15 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Git e Github</title>
-</head>
-<body>
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
+from PIL import Image, ImageTk
+import os
 
-    <h1>Olá git e github no vscode</h1>
-<p> Olá git r github</p>
-    <p> modificado mais uma vez</p>
+class ProductRegistrationApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Cadastro de Produtos")
+        self.root.geometry("800x600")
 
-</body>
-</html>    
+        # Sidebar
+        self.sidebar = ttk.Frame(root, width=200, style="Sidebar.TFrame")
+        self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
+
+        self.btn_cadastrar = ttk.Button(self.sidebar, text="Cadastrar", command=self.show_cadastro)
+        self.btn_cadastrar.pack(pady=10, padx=10, fill=tk.X)
+
+        self.btn_listar = ttk.Button(self.sidebar, text="Listar Produtos", command=self.show_listagem)
+        self.btn_listar.pack(pady=10, padx=10, fill=tk.X)
+
+        # Main Frame
+        self.main_frame = ttk.Frame(root)
+        self.main_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+        # Cadastro Frame
+        self.cadastro_frame = ttk.Frame(self.main_frame)
+        self.create_cadastro_widgets()
+
+        # Listagem Frame
+        self.listagem_frame = ttk.Frame(self.main_frame)
+        self.create_listagem_widgets()
+
+        self.show_cadastro()
+
+    def create_cadastro_widgets(self):
+        self.clear_frame(self.cadastro_frame)
+
+        ttk.Label(self.cadastro_frame, text="Foto do Produto").grid(row=0, column=0, padx=10, pady=10)
+        self.btn_upload = ttk.Button(self.cadastro_frame, text="Upload", command=self.upload_image)
+        self.btn_upload.grid(row=0, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Nome").grid(row=1, column=0, padx=10, pady=10)
+        self.entry_nome = ttk.Entry(self.cadastro_frame)
+        self.entry_nome.grid(row=1, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Data de Entrada").grid(row=2, column=0, padx=10, pady=10)
+        self.entry_data_entrada = ttk.Entry(self.cadastro_frame)
+        self.entry_data_entrada.grid(row=2, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Data de Saída").grid(row=3, column=0, padx=10, pady=10)
+        self.entry_data_saida = ttk.Entry(self.cadastro_frame)
+        self.entry_data_saida.grid(row=3, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Tipo").grid(row=4, column=0, padx=10, pady=10)
+        self.entry_tipo = ttk.Entry(self.cadastro_frame)
+        self.entry_tipo.grid(row=4, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Cor").grid(row=5, column=0, padx=10, pady=10)
+        self.entry_cor = ttk.Entry(self.cadastro_frame)
+        self.entry_cor.grid(row=5, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Tamanho (P,M,G)").grid(row=6, column=0, padx=10, pady=10)
+        self.entry_tamanho = ttk.Combobox(self.cadastro_frame, values=["P", "M", "G"])
+        self.entry_tamanho.grid(row=6, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Peso").grid(row=7, column=0, padx=10, pady=10)
+        self.entry_peso = ttk.Entry(self.cadastro_frame)
+        self.entry_peso.grid(row=7, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Altura").grid(row=8, column=0, padx=10, pady=10)
+        self.entry_altura = ttk.Entry(self.cadastro_frame)
+        self.entry_altura.grid(row=8, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Largura").grid(row=9, column=0, padx=10, pady=10)
+        self.entry_largura = ttk.Entry(self.cadastro_frame)
+        self.entry_largura.grid(row=9, column=1, padx=10, pady=10)
+
+        ttk.Label(self.cadastro_frame, text="Fornecedor").grid(row=10, column=0, padx=10, pady=10)
+        self.entry_fornecedor = ttk.Entry(self.cadastro_frame)
+        self.entry_fornecedor.grid(row=10, column=1, padx=10, pady=10)
+
+        self.btn_salvar = ttk.Button(self.cadastro_frame, text="Salvar", command=self.salvar_produto)
+        self.btn_salvar.grid(row=11, column=0, columnspan=2, pady=20)
+
+    def create_listagem_widgets(self):
+        self.clear_frame(self.listagem_frame)
+
+        self.tree = ttk.Treeview(self.listagem_frame, columns=("Nome", "Tipo", "Cor", "Tamanho", "Fornecedor"), show="headings")
+        self.tree.heading("Nome", text="Nome")
+        self.tree.heading("Tipo", text="Tipo")
+        self.tree.heading("Cor", text="Cor")
+        self.tree.heading("Tamanho", text="Tamanho")
+        self.tree.heading("Fornecedor", text="Fornecedor")
+        self.tree.pack(fill=tk.BOTH, expand=True)
+
+    def show_cadastro(self):
+        self.listagem_frame.pack_forget()
+        self.cadastro_frame.pack(fill=tk.BOTH, expand=True)
+
+    def show_listagem(self):
+        self.cadastro_frame.pack_forget()
+        self.listagem_frame.pack(fill=tk.BOTH, expand=True)
+        self.update_listagem()
+
+    def upload_image(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png")])
+        if file_path:
+            self.image_path = file_path
+            messagebox.showinfo("Sucesso", "Imagem carregada com sucesso!")
+
+    def salvar_produto(self):
+        produto = {
+            "nome": self.entry_nome.get(),
+            "data_entrada": self.entry_data_entrada.get(),
+            "data_saida": self.entry_data_saida.get(),
+            "tipo": self.entry_tipo.get(),
+            "cor": self.entry_cor.get(),
+            "tamanho": self.entry_tamanho.get(),
+            "peso": self.entry_peso.get(),
+            "altura": self.entry_altura.get(),
+            "largura": self.entry_largura.get(),
+            "fornecedor": self.entry_fornecedor.get(),
+            "imagem": self.image_path if hasattr(self, 'image_path') else None
+        }
+        self.produtos.append(produto)
+        messagebox.showinfo("Sucesso", "Produto cadastrado com sucesso!")
+        self.clear_entries()
+
+    def clear_entries(self):
+        self.entry_nome.delete(0, tk.END)
+        self.entry_data_entrada.delete(0, tk.END)
+        self.entry_data_saida.delete(0, tk.END)
+        self.entry_tipo.delete(0, tk.END)
+        self.entry_cor.delete(0, tk.END)
+        self.entry_tamanho.set('')
+        self.entry_peso.delete(0, tk.END)
+        self.entry_altura.delete(0, tk.END)
+        self.entry_largura.delete(0, tk.END)
+        self.entry_fornecedor.delete(0, tk.END)
+        if hasattr(self, 'image_path'):
+            del self.image_path
+
+    def update_listagem(self):
+        for row in self.tree.get_children():
+            self.tree.delete(row)
+        for produto in self.produtos:
+            self.tree.insert("", tk.END, values=(
+                produto["nome"],
+                produto["tipo"],
+                produto["cor"],
+                produto["tamanho"],
+                produto["fornecedor"]
+            ))
+
+    def clear_frame(self, frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ProductRegistrationApp(root)
+    root.mainloop()
